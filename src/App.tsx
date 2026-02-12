@@ -544,7 +544,7 @@ function TabNav({ sections, active, onSelect, isMobile }: { sections: readonly S
 
   if (!isMobile) {
     return (
-      <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 0, flexWrap: "wrap", paddingBottom: 8 }}>
         {sections.map((s) => (<TabButton key={s} section={s} active={active} onSelect={onSelect} isMobile={false} />))}
       </div>
     );
@@ -564,7 +564,7 @@ function TabNav({ sections, active, onSelect, isMobile }: { sections: readonly S
   });
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", paddingBottom: 4 }}>
       <div style={fadeMask("left", canScrollLeft)} />
       <button onClick={() => scroll("left")} style={arrowBtn("left", canScrollLeft)} aria-label="Défiler à gauche">‹</button>
       <div ref={scrollRef} style={{ display: "flex", gap: 0, overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 28px" }}>
@@ -577,14 +577,30 @@ function TabNav({ sections, active, onSelect, isMobile }: { sections: readonly S
 }
 
 function TabButton({ section, active, onSelect, isMobile }: { section: Section; active: Section; onSelect: (s: Section) => void; isMobile: boolean }) {
+  const isActive = active === section;
   return (
-    <button onClick={() => onSelect(section)} style={{
-      padding: isMobile ? "8px 12px" : "10px 18px", background: active === section ? "#1e1e2e" : "transparent",
-      color: active === section ? "#fff" : "#777", border: "none",
-      borderBottom: active === section ? "2px solid #c840d8" : "2px solid transparent",
-      cursor: "pointer", fontSize: isMobile ? 11 : 13, fontWeight: active === section ? 700 : 500,
-      letterSpacing: 0.5, transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
-    }}>
+    <button
+      onClick={() => onSelect(section)}
+      style={{
+        padding: isMobile ? "8px 14px" : "10px 20px",
+        background: isActive
+          ? "linear-gradient(135deg, rgba(200,64,216,0.25), rgba(232,64,64,0.15))"
+          : "rgba(255,255,255,0.03)",
+        color: isActive ? "#fff" : "#999",
+        border: isActive ? "1px solid rgba(200,64,216,0.5)" : "1px solid rgba(255,255,255,0.06)",
+        borderRadius: 20,
+        cursor: "pointer",
+        fontSize: isMobile ? 11 : 13,
+        fontWeight: isActive ? 700 : 500,
+        letterSpacing: 0.5,
+        transition: "all 0.25s ease",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+        margin: isMobile ? "4px 3px" : "4px 4px",
+        boxShadow: isActive ? "0 0 12px rgba(200,64,216,0.25), inset 0 1px 0 rgba(255,255,255,0.1)" : "none",
+        textShadow: isActive ? "0 0 8px rgba(200,64,216,0.4)" : "none",
+      }}
+    >
       {sectionLabels[section]}
     </button>
   );
