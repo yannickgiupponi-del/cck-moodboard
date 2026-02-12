@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 /* ─── RESPONSIVE HOOK ─── */
 function useIsMobile(breakpoint = 768) {
@@ -77,41 +77,7 @@ export default function MoodBoard() {
           <p style={{ fontSize: m ? 13 : 16, color: "#999", margin: m ? "0 0 16px" : "0 0 24px", fontStyle: "italic" }}>
             Mood Board — De l'horreur pure au "Dark Carnival Fun"
           </p>
-          <div
-            style={{
-              display: "flex",
-              gap: 0,
-              overflowX: m ? "auto" : "visible",
-              flexWrap: m ? "nowrap" : "wrap",
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              margin: m ? "0 -16px" : "0",
-              padding: m ? "0 16px" : "0",
-            }}
-          >
-            {sections.map((s) => (
-              <button
-                key={s}
-                onClick={() => setActive(s)}
-                style={{
-                  padding: m ? "8px 12px" : "10px 18px",
-                  background: active === s ? "#1e1e2e" : "transparent",
-                  color: active === s ? "#fff" : "#777",
-                  border: "none",
-                  borderBottom: active === s ? "2px solid #c840d8" : "2px solid transparent",
-                  cursor: "pointer",
-                  fontSize: m ? 11 : 13,
-                  fontWeight: active === s ? 700 : 500,
-                  letterSpacing: 0.5,
-                  transition: "all 0.2s",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                }}
-              >
-                {sectionLabels[s]}
-              </button>
-            ))}
-          </div>
+          <TabNav sections={sections} active={active} onSelect={setActive} isMobile={m} />
         </div>
       </div>
 
@@ -204,9 +170,9 @@ function DirectionSection() {
         les rires se mêlent aux cris — et quelque part dans le noir, quelqu'un vous cherche.
       </p>
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr 1fr", gap: m ? 16 : 24, marginBottom: m ? 28 : 40 }}>
-        <ConceptCard icon="🎪" title="Le Cirque Maudit" description="Un cirque ambulant qui s'est installé dans votre ville et ne veut plus partir. Les attractions tournent encore, mais les artistes ont… changé. L'espace physique est un chapiteau permanent, pas un bunker." keywords={["Chapiteau", "Attractions détraquées", "Manèges", "Guirlandes", "Confettis noirs"]} />
-        <ConceptCard icon="🃏" title="Le Maître du Jeu" description="Le Tueur n'est pas un monstre — c'est un showman. Un Maître de Cérémonie qui a décidé que VOUS êtes le spectacle. Il est théâtral, flamboyant, presque charmant. C'est ce qui le rend effrayant." keywords={["Showman", "Théâtral", "Charismatique", "Imprévisible", "Performer"]} />
-        <ConceptCard icon="⚡" title="Le Jeu avant la Peur" description="Chaque élément visuel doit donner envie de jouer. Les affiches sont des invitations, pas des avertissements. Le logo fait sourire nerveusement, pas fuir. L'énergie est celle d'un parc à thème, pas d'un film d'horreur." keywords={["Excitation", "Défi", "Énergie", "Social", "Rejouabilité"]} />
+        <ConceptCard icon="🎪" title="Le Cirque Maudit" description="Un cirque ambulant qui s'est installé dans votre ville et ne veut plus partir. Les attractions tournent encore, mais les artistes ont… changé." keywords={["Chapiteau", "Attractions détraquées", "Manèges", "Guirlandes", "Confettis noirs"]} />
+        <ConceptCard icon="🃏" title="Le Maître du Jeu" description="Le Tueur n'est pas un monstre — c'est un showman. Un Maître de Cérémonie qui a décidé que VOUS êtes le spectacle." keywords={["Showman", "Théâtral", "Charismatique", "Imprévisible", "Performer"]} />
+        <ConceptCard icon="⚡" title="Le Jeu avant la Peur" description="Chaque élément visuel doit donner envie de jouer. Les affiches sont des invitations, pas des avertissements." keywords={["Excitation", "Défi", "Énergie", "Social", "Rejouabilité"]} />
       </div>
       <SectionTitle>Les 5 piliers visuels</SectionTitle>
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(5, 1fr)", gap: 16 }}>
@@ -278,11 +244,11 @@ function TypoSection() {
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: m ? 20 : 32, marginBottom: m ? 28 : 40 }}>
         <Card accent="#e84040" title="❌ Avant : Gothique Médiéval">
           <div style={{ fontSize: m ? 24 : 36, fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, color: "#f0e8d8", fontStyle: "italic", margin: "16px 0", letterSpacing: 2 }}>Cache Cache Killer</div>
-          <p style={{ color: "#888", fontSize: m ? 12 : 13, lineHeight: 1.6 }}>La typographie gothique/médiévale actuelle évoque le Moyen-Âge, le dark fantasy, les jeux de rôle sombres. C'est élégant mais froid, et ça ne dit ni "cirque" ni "fun". Les diamants et le croissant de lune renforcent un univers mystique qui n'est pas le vôtre.</p>
+          <p style={{ color: "#888", fontSize: m ? 12 : 13, lineHeight: 1.6 }}>La typographie gothique/médiévale actuelle évoque le Moyen-Âge, le dark fantasy, les jeux de rôle sombres. C'est élégant mais froid, et ça ne dit ni "cirque" ni "fun".</p>
         </Card>
         <Card accent="#f0a030" title="✦ Après : Carnival Display Bold">
           <div style={{ fontSize: m ? 26 : 38, fontFamily: "'Impact', 'Arial Black', sans-serif", fontWeight: 900, color: "#f0e8d8", margin: "16px 0", letterSpacing: m ? 1 : 3, textTransform: "uppercase", textShadow: "0 0 20px rgba(240,160,48,0.3), 2px 2px 0 #e84040" }}>CACHE CACHE KILLER</div>
-          <p style={{ color: "#999", fontSize: m ? 12 : 13, lineHeight: 1.6 }}>Direction : typographie <strong>bold, large, spectaculaire</strong> inspirée des affiches de cirque et de fête foraine. Des lettres qui ont de la personnalité, du volume, de l'impact — comme peintes sur un chapiteau. Fun au premier regard, inquiétant au second.</p>
+          <p style={{ color: "#999", fontSize: m ? 12 : 13, lineHeight: 1.6 }}>Direction : typographie <strong>bold, large, spectaculaire</strong> inspirée des affiches de cirque et de fête foraine.</p>
         </Card>
       </div>
       <SectionTitle>Hiérarchie Typographique Proposée</SectionTitle>
@@ -290,17 +256,17 @@ function TypoSection() {
         <div style={{ background: "#141420", borderRadius: 12, padding: m ? 16 : 24 }}>
           <span style={{ fontSize: 11, color: "#f0a030", letterSpacing: 2 }}>TITRES / LOGO</span>
           <div style={{ fontSize: m ? 20 : 28, fontWeight: 900, fontFamily: "'Impact', sans-serif", textTransform: "uppercase", letterSpacing: 2, marginTop: 12, color: "#fff" }}>CIRCUS SLAB / DISPLAY</div>
-          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Barnum, Showtime, Circus Didot, Playfair Display Black. Lettres larges, empattements prononcés ou display bold. Peut avoir des déformations subtiles.</p>
+          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Barnum, Showtime, Circus Didot, Playfair Display Black.</p>
         </div>
         <div style={{ background: "#141420", borderRadius: 12, padding: m ? 16 : 24 }}>
           <span style={{ fontSize: 11, color: "#c840d8", letterSpacing: 2 }}>SOUS-TITRES / ACCROCHES</span>
           <div style={{ fontSize: m ? 18 : 22, fontWeight: 600, fontFamily: "sans-serif", marginTop: 12, color: "#fff", fontStyle: "italic" }}>Condensed Sans Bold Italic</div>
-          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Oswald Bold, Bebas Neue, Barlow Condensed Bold. Nerveuse, dynamique, lisible.</p>
+          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Oswald Bold, Bebas Neue, Barlow Condensed Bold.</p>
         </div>
         <div style={{ background: "#141420", borderRadius: 12, padding: m ? 16 : 24 }}>
           <span style={{ fontSize: 11, color: "#4080ff", letterSpacing: 2 }}>CORPS / UI</span>
           <div style={{ fontSize: 16, fontWeight: 400, fontFamily: "sans-serif", marginTop: 12, color: "#fff" }}>Clean sans-serif lisible</div>
-          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Inter, DM Sans, Plus Jakarta Sans. Propre, moderne, haute lisibilité sur fond sombre.</p>
+          <p style={{ color: "#777", fontSize: 12, marginTop: 12, lineHeight: 1.6 }}>Références : Inter, DM Sans, Plus Jakarta Sans.</p>
         </div>
       </div>
       <div style={{ marginTop: m ? 24 : 32, background: "linear-gradient(135deg, #0c0c14, #1a0a20)", borderRadius: m ? 12 : 16, padding: m ? 20 : 32, textAlign: "center", border: "1px solid #2a2a3a" }}>
@@ -319,18 +285,18 @@ function UniversSection() {
     <div>
       <SectionTitle>Univers Visuel — Éléments Clés</SectionTitle>
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: m ? 16 : 24, marginBottom: m ? 28 : 40 }}>
-        <MoodCard title="🎪 Décor : Le Cirque de Minuit" items={["Chapiteaux rayés rouge & noir (pas des couloirs d'hôpital)", "Guirlandes lumineuses, ampoules nues, néons qui clignotent", "Affiches vintage de \"freakshow\" avec vos personnages", "Confettis, serpentins, ballons dégonflés au sol", "Manèges figés, attractions détraquées en arrière-plan", "Rayures de cirque (rouge/noir, bleu/noir) comme motif récurrent"]} />
-        <MoodCard title="🎭 Personnages : Performers, pas Monstres" items={["Les Tueurs sont des artistes de cirque corrompus : clown, acrobate, magicien, dompteur", "Ils ont du charisme, une signature visuelle forte (comme les Killers de Dead by Daylight)", "Les Survivants portent des tenues de spectateurs/stagiaires du cirque", "Chaque classe a un costume iconique, reconnaissable en silhouette", "Les masques des Tueurs sont expressifs : sourires figés, maquillages outranciers", "Style plus cartoon/stylisé que réaliste — accessible, mémorable"]} />
-        <MoodCard title="✨ Effets Visuels & Textures" items={["Fumées colorées (GARDÉES) : bleu survivants, rouge tueurs, violet mystère", "Confettis et paillettes dans les visuels (même en 2D)", "Effets néon, lueurs chaudes, halos lumineux", "Textures : vieux bois peint, toile de chapiteau, métal rouillé de manège", "Étoiles, losanges, motifs de cartes à jouer", "Grain vintage / affiche usée (mais pas trop — rester net et moderne)"]} />
-        <MoodCard title="🎬 Ton & Atmosphère" items={["\"Bienvenue au plus grand spectacle de votre vie… et peut-être le dernier.\"", "Le Maître de Cérémonie s'adresse au public avec ironie et panache", "Annonces façon fête foraine : \"Mesdames, Messieurs, la chasse commence !\"", "Musique : orgue de Barbarie + synthwave / beats électro sombres", "Le ton est JOUEUR : on taquine, on défie, on provoque avec le sourire", "Jamais gore, jamais trash — toujours du spectacle"]} />
+        <MoodCard title="🎪 Décor : Le Cirque de Minuit" items={["Chapiteaux rayés rouge & noir", "Guirlandes lumineuses, ampoules nues, néons", "Affiches vintage de \"freakshow\"", "Confettis, serpentins, ballons dégonflés", "Manèges figés, attractions détraquées", "Rayures de cirque comme motif récurrent"]} />
+        <MoodCard title="🎭 Personnages : Performers, pas Monstres" items={["Les Tueurs sont des artistes de cirque corrompus", "Charisme et signature visuelle forte", "Survivants en tenues de spectateurs/stagiaires", "Costumes iconiques, reconnaissables en silhouette", "Masques expressifs : sourires figés, maquillages", "Style cartoon/stylisé — accessible, mémorable"]} />
+        <MoodCard title="✨ Effets Visuels & Textures" items={["Fumées colorées : bleu survivants, rouge tueurs", "Confettis et paillettes dans les visuels", "Effets néon, lueurs chaudes, halos lumineux", "Textures : bois peint, toile de chapiteau, métal rouillé", "Étoiles, losanges, motifs de cartes à jouer", "Grain vintage / affiche usée"]} />
+        <MoodCard title="🎬 Ton & Atmosphère" items={["\"Bienvenue au plus grand spectacle de votre vie…\"", "Le MC s'adresse au public avec ironie et panache", "Annonces façon fête foraine", "Musique : orgue de Barbarie + synthwave", "Ton JOUEUR : on taquine, on défie, on provoque", "Jamais gore — toujours du spectacle"]} />
       </div>
       <SectionTitle>Références & Inspirations</SectionTitle>
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(4, 1fr)", gap: 16 }}>
         {[
-          { title: "Killer Klowns from Outer Space", desc: "L'horreur fun par excellence. Clowns menaçants mais absurdes, couleurs saturées, ambiance foraine.", what: "Le ton, la dualité fun/peur, les couleurs" },
-          { title: "Five Nights at Freddy's", desc: "Horror accessible, mascots corrompues, esthétique enfantine détournée. Énorme succès mainstream.", what: "L'accessibilité, le côté \"mascotte\", le merch" },
-          { title: "Beetlejuice", desc: "Rayures, néon, chaos visuel maîtrisé. Le personnage est terrifiant ET hilarant.", what: "Les rayures, le chaos contrôlé, le fun" },
-          { title: "The Night Circus", desc: "Cirque mystérieux, élégant, magnétique. Noir & blanc avec touches de couleur. Magie et émerveillement.", what: "L'élégance, le mystère, l'envie d'entrer" },
+          { title: "Killer Klowns from Outer Space", desc: "L'horreur fun par excellence. Couleurs saturées, ambiance foraine.", what: "Le ton, la dualité fun/peur" },
+          { title: "Five Nights at Freddy's", desc: "Horror accessible, mascots corrompues, esthétique enfantine.", what: "L'accessibilité, les mascottes" },
+          { title: "Beetlejuice", desc: "Rayures, néon, chaos visuel maîtrisé.", what: "Les rayures, le chaos contrôlé" },
+          { title: "The Night Circus", desc: "Cirque mystérieux, élégant, magnétique.", what: "L'élégance, le mystère" },
         ].map((ref) => (
           <div key={ref.title} style={{ background: "#141420", borderRadius: 12, padding: m ? 16 : 20, border: "1px solid #2a2a3a" }}>
             <h4 style={{ fontSize: 14, color: "#f0a030", margin: "0 0 8px" }}>{ref.title}</h4>
@@ -356,7 +322,7 @@ function LogoSection() {
             <div style={{ width: 80, height: 3, background: "#e84040", margin: "8px auto", borderRadius: 2 }} />
             <div style={{ fontSize: 10, letterSpacing: 4, color: "#f0a030" }}>CACHE CACHE KILLER</div>
           </div>
-          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Le monogramme CCK dans un cadre inspiré d'un fronton de chapiteau. Étoiles décoratives, rayures en fond. Version compacte pour les réseaux, version longue pour le site.</p>
+          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Le monogramme CCK dans un cadre inspiré d'un fronton de chapiteau.</p>
         </Card>
         <Card accent="#c840d8" title="Piste 2 : Le Ticket d'Entrée">
           <div style={{ textAlign: "center", margin: "20px 0" }}>
@@ -366,7 +332,7 @@ function LogoSection() {
               <div style={{ fontSize: m ? 16 : 20, fontWeight: 900, color: "#e84040", fontFamily: "'Impact', sans-serif" }}>KILLER</div>
             </div>
           </div>
-          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Le logo comme un ticket de spectacle / billet d'entrée. Renforce l'idée d'événement, de spectacle. "ADMIT ONE" / "ENTRÉE" en petites capitales.</p>
+          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Le logo comme un ticket de spectacle / billet d'entrée.</p>
         </Card>
         <Card accent="#f0a030" title="Piste 3 : La Mascotte">
           <div style={{ textAlign: "center", margin: "20px 0" }}>
@@ -374,12 +340,12 @@ function LogoSection() {
             <div style={{ fontSize: m ? 18 : 22, fontWeight: 900, fontFamily: "'Impact', sans-serif", textTransform: "uppercase", letterSpacing: 1, color: "#fff" }}>CACHE CACHE</div>
             <div style={{ fontSize: m ? 14 : 16, fontWeight: 900, color: "#e84040", letterSpacing: 3, fontFamily: "'Impact', sans-serif" }}>K I L L E R</div>
           </div>
-          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Un personnage iconique (le Maître de Cérémonie / un clown stylisé) intégré au logo. Crée de l'attachement, du merch, une mascotte reconnaissable. Pensez au Freddy de FNAF, au Joker.</p>
+          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>Un personnage iconique intégré au logo. Crée de l'attachement et du merch.</p>
         </Card>
       </div>
       <SectionTitle>Éléments graphiques récurrents</SectionTitle>
       <div style={{ display: "flex", gap: m ? 8 : 16, flexWrap: "wrap" }}>
-        {["★ Étoiles (motif cirque)", "◆ Losanges (motif arlequin)", "⚡ Éclairs (action, énergie)", "🎪 Chapiteau (cadre, icône)", "🎟️ Ticket (CTA, réservation)", "🃏 Cartes à jouer (personnages)", "↺ Spirales (hypnose, mystère)", "✂ Rayures (tentes, costumes)"].map((e) => (
+        {["★ Étoiles", "◆ Losanges", "⚡ Éclairs", "🎪 Chapiteau", "🎟️ Ticket", "🃏 Cartes", "↺ Spirales", "✂ Rayures"].map((e) => (
           <span key={e} style={{ background: "#1a1a2a", border: "1px solid #2a2a3a", borderRadius: 8, padding: m ? "6px 10px" : "8px 16px", fontSize: m ? 11 : 13, color: "#ccc" }}>{e}</span>
         ))}
       </div>
@@ -445,7 +411,7 @@ function ApplicationsSection() {
       <SectionTitle>Prochaines étapes</SectionTitle>
       <div style={{ background: "#141420", borderRadius: m ? 12 : 16, padding: m ? 16 : 24, border: "1px solid #2a2a3a" }}>
         <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr 1fr", gap: 20 }}>
-          {[{ step: "1", title: "Valider la direction", desc: "Confirmer les principes du mood board avec l'équipe. Ajuster les curseurs fun/peur.", color: "#f0a030" }, { step: "2", title: "Créer le nouveau logo", desc: "Briefer un graphiste ou itérer avec IA sur les 3 pistes proposées. Tester en contexte.", color: "#c840d8" }, { step: "3", title: "Décliner la charte", desc: "Typographies finales, iconographie, motifs, templates réseaux, kit UI pour les plateformes.", color: "#4080ff" }].map((s) => (
+          {[{ step: "1", title: "Valider la direction", desc: "Confirmer les principes du mood board avec l'équipe.", color: "#f0a030" }, { step: "2", title: "Créer le nouveau logo", desc: "Briefer un graphiste ou itérer avec IA sur les 3 pistes.", color: "#c840d8" }, { step: "3", title: "Décliner la charte", desc: "Typographies finales, iconographie, motifs, templates.", color: "#4080ff" }].map((s) => (
             <div key={s.step} style={{ textAlign: "center" }}>
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: s.color, color: "#fff", fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>{s.step}</div>
               <h4 style={{ color: "#fff", margin: "0 0 8px", fontSize: 14 }}>{s.title}</h4>
@@ -461,9 +427,7 @@ function ApplicationsSection() {
 /* ─── COMPONENTS ─── */
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: "0 0 20px", paddingBottom: 8, borderBottom: "1px solid #2a2a3a" }}>{children}</h2>
-  );
+  return <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: "0 0 20px", paddingBottom: 8, borderBottom: "1px solid #2a2a3a" }}>{children}</h2>;
 }
 
 function Card({ accent, title, children }: { accent: string; title: string; children: React.ReactNode }) {
@@ -478,9 +442,7 @@ function Card({ accent, title, children }: { accent: string; title: string; chil
 function TagList({ tags }: { tags: { label: string; color: string }[] }) {
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      {tags.map((t) => (
-        <span key={t.label} style={{ background: `${t.color}20`, color: t.color, padding: "4px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600 }}>{t.label}</span>
-      ))}
+      {tags.map((t) => (<span key={t.label} style={{ background: `${t.color}20`, color: t.color, padding: "4px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600 }}>{t.label}</span>))}
     </div>
   );
 }
@@ -488,9 +450,7 @@ function TagList({ tags }: { tags: { label: string; color: string }[] }) {
 function Pill({ color, size, children }: { color: string; size?: string; children: React.ReactNode }) {
   const isLarge = size === "large";
   const isSmall = size === "small";
-  return (
-    <span style={{ background: `${color}20`, color, padding: isLarge ? "10px 20px" : isSmall ? "6px 12px" : "6px 14px", borderRadius: 30, fontSize: isLarge ? 16 : isSmall ? 12 : 13, fontWeight: 700, border: `1px solid ${color}40` }}>{children}</span>
-  );
+  return <span style={{ background: `${color}20`, color, padding: isLarge ? "10px 20px" : isSmall ? "6px 12px" : "6px 14px", borderRadius: 30, fontSize: isLarge ? 16 : isSmall ? 12 : 13, fontWeight: 700, border: `1px solid ${color}40` }}>{children}</span>;
 }
 
 function ColorSwatch({ hex, name }: { hex: string; name: string }) {
@@ -532,9 +492,7 @@ function ConceptCard({ icon, title, description, keywords }: { icon: string; tit
       <h3 style={{ fontSize: 16, color: "#fff", margin: "0 0 8px" }}>{title}</h3>
       <p style={{ fontSize: 13, color: "#999", lineHeight: 1.7, margin: "0 0 12px" }}>{description}</p>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {keywords.map((k) => (
-          <span key={k} style={{ background: "#1a1a2a", color: "#aaa", padding: "3px 8px", borderRadius: 4, fontSize: 11 }}>{k}</span>
-        ))}
+        {keywords.map((k) => (<span key={k} style={{ background: "#1a1a2a", color: "#aaa", padding: "3px 8px", borderRadius: 4, fontSize: 11 }}>{k}</span>))}
       </div>
     </div>
   );
@@ -551,5 +509,83 @@ function MoodCard({ title, items }: { title: string; items: string[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function TabNav({ sections, active, onSelect, isMobile }: { sections: readonly Section[]; active: Section; onSelect: (section: Section) => void; isMobile: boolean }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !isMobile) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [isMobile, checkScroll]);
+
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -140 : 140, behavior: "smooth" });
+  };
+
+  if (!isMobile) {
+    return (
+      <div style={{ display: "flex", gap: 0, flexWrap: "wrap" }}>
+        {sections.map((s) => (<TabButton key={s} section={s} active={active} onSelect={onSelect} isMobile={false} />))}
+      </div>
+    );
+  }
+
+  const arrowBtn = (dir: "left" | "right", visible: boolean): React.CSSProperties => ({
+    position: "absolute", top: 0, [dir === "left" ? "left" : "right"]: 0, zIndex: 3, height: "100%", width: 32,
+    display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none",
+    cursor: "pointer", color: "#c840d8", fontSize: 18, opacity: visible ? 1 : 0,
+    pointerEvents: visible ? "auto" : "none", transition: "opacity 0.2s", padding: 0,
+  });
+
+  const fadeMask = (dir: "left" | "right", visible: boolean): React.CSSProperties => ({
+    position: "absolute", top: 0, [dir === "left" ? "left" : "right"]: 0, width: 40, height: "100%",
+    background: dir === "left" ? "linear-gradient(90deg, #0a0a0a 30%, transparent)" : "linear-gradient(270deg, #0a0a0a 30%, transparent)",
+    pointerEvents: "none", zIndex: 2, opacity: visible ? 1 : 0, transition: "opacity 0.25s",
+  });
+
+  return (
+    <div style={{ position: "relative" }}>
+      <div style={fadeMask("left", canScrollLeft)} />
+      <button onClick={() => scroll("left")} style={arrowBtn("left", canScrollLeft)} aria-label="Défiler à gauche">‹</button>
+      <div ref={scrollRef} style={{ display: "flex", gap: 0, overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", padding: "0 28px" }}>
+        {sections.map((s) => (<TabButton key={s} section={s} active={active} onSelect={onSelect} isMobile />))}
+      </div>
+      <div style={fadeMask("right", canScrollRight)} />
+      <button onClick={() => scroll("right")} style={arrowBtn("right", canScrollRight)} aria-label="Défiler à droite">›</button>
+    </div>
+  );
+}
+
+function TabButton({ section, active, onSelect, isMobile }: { section: Section; active: Section; onSelect: (s: Section) => void; isMobile: boolean }) {
+  return (
+    <button onClick={() => onSelect(section)} style={{
+      padding: isMobile ? "8px 12px" : "10px 18px", background: active === section ? "#1e1e2e" : "transparent",
+      color: active === section ? "#fff" : "#777", border: "none",
+      borderBottom: active === section ? "2px solid #c840d8" : "2px solid transparent",
+      cursor: "pointer", fontSize: isMobile ? 11 : 13, fontWeight: active === section ? 700 : 500,
+      letterSpacing: 0.5, transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+    }}>
+      {sectionLabels[section]}
+    </button>
   );
 }
